@@ -64,9 +64,14 @@ public class CheckoutOverviewPage extends BasePage {
         return idx >= 0 ? text.substring(idx + 1).trim() : text.trim();
     }
 
+    /**
+     * Hace clic en Finish y espera a que la URL cambie a checkout-complete.
+     * Usa clic por JavaScript para evitar fallos por overlays o animaciones.
+     */
     public void clickFinish() {
         waitForClickable(finishButton);
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", finishButton);
-        finishButton.click();
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", finishButton);
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", finishButton);
+        waitForUrlContains("checkout-complete");
     }
 }

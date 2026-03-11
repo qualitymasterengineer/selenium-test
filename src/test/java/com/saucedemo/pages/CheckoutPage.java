@@ -1,5 +1,6 @@
 package com.saucedemo.pages;
 
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -43,12 +44,17 @@ public class CheckoutPage extends BasePage {
         postalCodeInput.sendKeys(postalCode);
     }
 
-    /** Rellenar nombre, apellido, código postal y continuar. */
+    /**
+     * Rellena nombre, apellido y código postal, hace clic en Continue y espera la URL checkout-step-two.
+     * Usa clic por JavaScript para evitar fallos por overlays o validación.
+     */
     public void fillAndContinue(String firstName, String lastName, String postalCode) {
         fillFirstName(firstName);
         fillLastName(lastName);
         fillPostalCode(postalCode);
         waitForClickable(continueButton);
-        continueButton.click();
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", continueButton);
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", continueButton);
+        waitForUrlContains("checkout-step-two");
     }
 }

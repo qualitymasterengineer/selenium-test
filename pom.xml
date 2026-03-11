@@ -61,8 +61,7 @@
                         <junit.jupiter.extensions.autodetection.enabled>true</junit.jupiter.extensions.autodetection.enabled>
                     </systemPropertyVariables>
                     <reportNameSuffix>saucedemo</reportNameSuffix>
-                    <!-- Exclude known-failure tests so build passes; run them in CI with continue-on-error -->
-                    <excludedGroups>knownFailure</excludedGroups>
+                    <!-- Todos los tests se ejecutan y aparecen en Allure. Para excluir fallos conocidos: mvn test -DexcludedGroups=knownFailure -->
                 </configuration>
             </plugin>
             <!-- Copiar categories.json a allure-results para que el reporte muestre Categorías -->

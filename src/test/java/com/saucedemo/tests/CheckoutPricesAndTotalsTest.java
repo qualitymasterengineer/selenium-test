@@ -92,13 +92,8 @@ class CheckoutPricesAndTotalsTest extends BaseTest {
 
         CheckoutCompletePage completePage = new CheckoutCompletePage(driver);
         Allure.step("Verificar confirmación del pedido", () -> {
-            try {
-                completePage.waitForUrlContains("checkout-complete");
-            } catch (Exception e) {
-                assertTrue(driver.getCurrentUrl().contains("checkout-complete"),
-                    "URL debe contener checkout-complete. Actual: " + driver.getCurrentUrl());
-            }
-            assertTrue(driver.getCurrentUrl().contains("checkout-complete"), "URL debe contener checkout-complete");
+            assertTrue(driver.getCurrentUrl().contains("checkout-complete"),
+                "URL debe contener checkout-complete. Actual: " + driver.getCurrentUrl());
             assertTrue(completePage.isOrderComplete(), "Pedido debe estar completado");
             String header = completePage.getConfirmationHeaderText();
             assertTrue(header.toLowerCase().contains("thank you"), "Mensaje debe contener thank you");

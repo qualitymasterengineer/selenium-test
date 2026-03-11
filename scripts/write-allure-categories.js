@@ -1,6 +1,6 @@
 /**
  * Escribe allure-results/categories.json (sección Categories).
- * Alineado con Playwright: Known failures, Test defects, Product defects, Passed, Skipped, Unknown.
+ * Tras patch-allure-broken-to-failed.js, solo los known failures quedan "broken"; el resto son "failed".
  */
 const fs = require('fs');
 const path = require('path');
@@ -11,7 +11,6 @@ if (!fs.existsSync(resultsDir)) fs.mkdirSync(resultsDir, { recursive: true });
 
 const categories = [
   { name: 'Known failures', matchedStatuses: ['broken'], messageRegex: '.*Known failure.*' },
-  { name: 'Test defects', matchedStatuses: ['broken'], messageRegex: '^(?!Known failure:).*' },
   { name: 'Product defects', matchedStatuses: ['failed'] },
   { name: 'Passed', matchedStatuses: ['passed'] },
   { name: 'Skipped', matchedStatuses: ['skipped'] },

@@ -5,11 +5,6 @@
     "messageRegex": ".*Known failure.*"
   },
   {
-    "name": "Test defects",
-    "matchedStatuses": ["broken"],
-    "messageRegex": "^(?!Known failure:).*"
-  },
-  {
     "name": "Product defects",
     "matchedStatuses": ["failed"]
   },

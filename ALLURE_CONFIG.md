@@ -49,7 +49,8 @@ En `package.json`, el script **prepare-allure.js** ejecuta **en este orden**:
 3. **write-allure-executor.js** — Escribe `target/allure-results/executor.json` (Executors).
 4. **write-allure-categories.js** — Escribe `target/allure-results/categories.json` (Categories).
 5. **patch-allure-known-failures.js** — Modifica los `*-result.json` de tests de fallo conocido (status → `broken`, mensaje con prefijo `Known failure: `).
-6. **patch-allure-passed-message.js** — Asigna mensaje por defecto a tests passed para evitar "Empty" en Categories.
+6. **patch-allure-broken-to-failed.js** — Convierte todo resultado `broken` cuyo mensaje **no** contiene "Known failure" a `failed`. Así en el reporte solo los fallos conocidos aparecen como Broken; el resto como Failed.
+7. **patch-allure-passed-message.js** — Asigna mensaje por defecto a tests passed para evitar "Empty" en Categories.
 
 Después se ejecuta **`mvn allure:report`** (en `report:allure:generate`), que genera el HTML en `target/site/allure-maven-plugin/`.
 
@@ -103,18 +104,17 @@ La pestaña **Executors** del reporte muestra este nombre y enlace al run (cuand
 **Archivo generado:** `target/allure-results/categories.json`  
 **Script:** `scripts/write-allure-categories.js` (y plantilla en `src/test/resources/allure/categories.json`)
 
-Define cómo se agrupan los tests en la pestaña **Categories**:
+Define cómo se agrupan los tests en la pestaña **Categories** (el primer match gana). Tras **patch-allure-broken-to-failed.js**, en los JSON solo quedan como `broken` los known failures; el resto de fallos están como `failed`:
 
-| Categoría          | Condición | Uso en el reporte |
-|--------------------|-----------|---------------------|
-| **Known failures** | `status === 'broken'` y mensaje coincide con `.*Known failure.*` | Tests de fallo conocido (naranja). |
-| **Test defects**   | `status === 'broken'` y mensaje **no** empieza por "Known failure:" | Otros broken (naranja). |
-| **Product defects**| `status === 'failed'` | Fallos de la aplicación (rojo). |
-| **Passed**         | `status === 'passed'` | Tests correctos (verde). |
-| **Skipped**        | `status === 'skipped'` | Omitidos. |
-| **Unknown**        | `status === 'unknown'` | Estado desconocido. |
+| Categoría           | Condición | Uso en el reporte |
+|---------------------|-----------|---------------------|
+| **Known failures**  | `status === 'broken'` y mensaje coincide con `.*Known failure.*` | Solo tests de fallo conocido. |
+| **Product defects** | `status === 'failed'` | Cualquier otro fallo (siempre Failed en el reporte). |
+| **Passed**          | `status === 'passed'` | Tests correctos (verde). |
+| **Skipped**         | `status === 'skipped'` | Omitidos. |
+| **Unknown**         | `status === 'unknown'` | Estado desconocido. |
 
-El orden en el array influye en cómo se muestran. Los patches dejan los resultados alineados con estas reglas.
+Así, los casos que no son known failure se muestran **siempre** como Failed (rojo), nunca como Broken.
 
 ---
 
@@ -130,11 +130,23 @@ El orden en el array influye en cómo se muestran. Los patches dejan los resulta
   - `status` → `'broken'`.
   - `statusDetails.message` → se antepone `"Known failure: "` si no lo tiene. Así la categoría **Known failures** los agrupa.
 
-Debe ejecutarse **antes** de `patch-allure-passed-message.js` y **antes** de `mvn allure:report`.
+Debe ejecutarse **antes** de `patch-allure-broken-to-failed.js` y **antes** de `mvn allure:report`.
 
 ---
 
-## 8. Mensaje por defecto en tests Passed
+## 8. Broken → Failed (fallos que no son known failure)
+
+**Script:** `scripts/patch-allure-broken-to-failed.js`
+
+- **Entrada:** archivos `*-result.json` en `target/allure-results/`.
+- **Criterio:** resultado con `status === 'broken'` y mensaje que **no** contiene `"Known failure"`.
+- **Cambio:** `status` → `'failed'`.
+
+Con esto, en Allure solo los fallos conocidos quedan como Broken (naranja); cualquier otro fallo se muestra como Failed (rojo). Debe ejecutarse **después** de `patch-allure-known-failures.js`.
+
+---
+
+## 9. Mensaje por defecto en tests Passed
 
 **Script:** `scripts/patch-allure-passed-message.js`
 
@@ -146,7 +158,7 @@ En la categoría **Passed** se muestra ese texto en lugar de &lt;Empty&gt;.
 
 ---
 
-## 9. Trend e historial (Overview y Graphs)
+## 10. Trend e historial (Overview y Graphs)
 
 **Script:** `scripts/copy-allure-history.js`
 
@@ -157,7 +169,7 @@ Allure, al ejecutar `mvn allure:report`, lee `target/allure-results/history` y l
 
 ---
 
-## 10. Scripts de npm relacionados con Allure
+## 11. Scripts de npm relacionados con Allure
 
 | Script                   | Descripción |
 |--------------------------|-------------|
@@ -169,7 +181,7 @@ Allure, al ejecutar `mvn allure:report`, lee `target/allure-results/history` y l
 
 ---
 
-## 11. Carpetas implicadas
+## 12. Carpetas implicadas
 
 | Carpeta | Contenido | ¿Versionada? |
 |---------|-----------|--------------|
@@ -179,7 +191,7 @@ Allure, al ejecutar `mvn allure:report`, lee `target/allure-results/history` y l
 
 ---
 
-## 12. Resumen del flujo completo
+## 13. Resumen del flujo completo
 
 1. **Ejecutar tests:** `mvn test` → Allure escribe en `target/allure-results/`.
 2. **Preparar y generar reporte (recomendado):**
