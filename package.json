@@ -1,0 +1,13 @@
+{
+  "name": "selenium-e2e-saucedemo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Scripts de preparación de Allure para el proyecto Selenium E2E",
+  "scripts": {
+    "report:allure:prepare": "node scripts/prepare-allure.js",
+    "report:allure:generate": "node scripts/prepare-allure.js && mvn allure:report",
+    "report:allure:open": "npx http-server target/site/allure-maven-plugin -p 8080 -c-1",
+    "report:allure": "npm run report:allure:generate && npm run report:allure:open",
+    "allure:clean": "node -e \"const fs=require('fs');const p=require('path');['target/allure-results','target/site/allure-maven-plugin'].forEach(d=>{const s=p.join(process.cwd(),d);if(fs.existsSync(s))fs.rmSync(s,{recursive:true});});console.log('allure:clean done');\""
+  }
+}
