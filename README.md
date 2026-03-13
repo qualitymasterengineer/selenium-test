@@ -100,7 +100,7 @@ npm run report:allure:open
 - **`report:allure:generate`**: ejecuta la preparación (history, env, executor, categories, patches) y luego `mvn allure:report`.
 - **`report:allure:open`**: levanta un servidor HTTP en el reporte; abre **http://localhost:8080** en el navegador.
 
-**Ver el reporte sin 404:** No abras `index.html` con doble clic (`file://`). Usa siempre `npm run report:allure:open` (o `npx http-server target/site/allure-maven-plugin -p 8080`) y entra a **http://localhost:8080**.
+**Ver el reporte:** Ejecuta `npm run report:allure:open` desde la raíz del proyecto; sirve la carpeta del reporte en **http://localhost:8080**. Si ves un listado de archivos en lugar del reporte, genera primero con `npm run report:allure:generate`. No abras `index.html` con doble clic (`file://`).
 
 ### Flujo mínimo (solo Maven)
 
@@ -111,6 +111,8 @@ npx http-server target/site/allure-maven-plugin -p 8080
 ```
 
 Luego abre **http://localhost:8080**. Sin los scripts de preparación no tendrás Environment, Executors ni Categories completos ni parches de known failures / passed.
+
+**Logo Selenium en Executors (solo Maven, sin ejecutar `node scripts/...` a mano):** genera el reporte y aplica el parche del logo en un solo comando: `mvn allure:report exec:exec@patch-allure-selenium-logo`. Requiere Node.js instalado.
 
 ## Estructura del proyecto
 

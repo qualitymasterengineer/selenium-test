@@ -4,9 +4,9 @@
   "private": true,
   "description": "Scripts de preparación de Allure para el proyecto Selenium E2E",
   "scripts": {
-    "report:allure:prepare": "node scripts/prepare-allure.js",
-    "report:allure:generate": "node scripts/prepare-allure.js && mvn allure:report",
-    "report:allure:open": "npx http-server target/site/allure-maven-plugin -p 8080 -c-1",
+    "report:allure:prepare": "node scripts/copy-allure-history.js && node scripts/write-allure-env.js && node scripts/write-allure-executor.js && node scripts/write-allure-categories.js && node scripts/patch-allure-known-failures.js && node scripts/patch-allure-broken-to-failed.js && node scripts/patch-allure-passed-message.js",
+    "report:allure:generate": "node scripts/copy-allure-history.js && node scripts/write-allure-env.js && node scripts/write-allure-executor.js && node scripts/write-allure-categories.js && node scripts/patch-allure-known-failures.js && node scripts/patch-allure-broken-to-failed.js && node scripts/patch-allure-passed-message.js && mvn allure:report -q && node scripts/patch-allure-selenium-logo.js",
+    "report:allure:open": "node scripts/patch-allure-selenium-logo.js && npx http-server target/site/allure-maven-plugin -p 8080 -c-1 -o",
     "report:allure": "npm run report:allure:generate && npm run report:allure:open",
     "allure:clean": "node -e \"const fs=require('fs');const p=require('path');['target/allure-results','target/site/allure-maven-plugin'].forEach(d=>{const s=p.join(process.cwd(),d);if(fs.existsSync(s))fs.rmSync(s,{recursive:true});});console.log('allure:clean done');\""
   }

@@ -77,12 +77,12 @@ La pestaña **Environment** del reporte muestra Java, SO y URL base.
 ## 5. Executors (sección "Executors")
 
 **Archivo generado:** `target/allure-results/executor.json`  
-**Script:** `scripts/write-allure-executor.js`
+El plugin **allure-maven** escribe este archivo al ejecutar `mvn allure:report`; el nombre se define en `pom.xml` con `allure.executor.name` y `<executorInfo>` (por defecto **Maven**; en CI se puede pasar `-Dallure.executor.name="Maven (GitHub Actions)"`). La **primera línea** muestra así "Maven" con el icono nativo (casco). Tras generar el reporte, `scripts/patch-allure-selenium-logo.js` (1) añade un segundo ejecutor en `widgets/executors.json` con `type: "selenium-custom"` ("Selenium Framework", "Selenium 4.x"); (2) en esa segunda línea oculta el icono nativo (casco) y aplica la clase `custom-selenium-logo` para mostrar solo el logo de Selenium vía CSS `::before`; (3) opcionalmente reemplaza el texto "selenium-custom" por "Selenium Automation". Si el parche falla, la primera línea (Maven) sigue viéndose bien; en la segunda solo se pierde el icono de Selenium.
 
 Define **quién** ejecutó los tests y el “build”.
 
 - **Si se ejecuta en GitHub Actions** (`GITHUB_ACTIONS === 'true'`):
-  - `name`: `"GitHub Actions"`
+  - `name`: `"Selenium (GitHub Actions)"`
   - `type`: `"github"`
   - `buildName`: nombre del workflow (ej. `"Selenium E2E"`)
   - `buildOrder`: `GITHUB_RUN_NUMBER`
@@ -90,12 +90,13 @@ Define **quién** ejecutó los tests y el “build”.
   - `reportName`: `"Run #<número>"`
 
 - **Si se ejecuta en local**:
-  - `name`: `"Selenium Local"`
+  - `name`: `"Selenium (Local)"`
+  - `type`: `"local"`
   - `buildName`: fecha/hora local (ej. `"Local 2025-03-10 19:30:00"`)
   - `buildOrder`: timestamp
   - `reportName`: `"Run #<fecha>"`
 
-La pestaña **Executors** del reporte muestra este nombre y enlace al run (cuando hay `buildUrl`).
+La pestaña **Executors** muestra así si la ejecución fue local o desde GitHub Actions, además de Maven (y enlace al run cuando hay `buildUrl`).
 
 ---
 
