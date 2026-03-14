@@ -27,16 +27,13 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-      - name: Run tests (exclude known-failure)
-        run: mvn test -DexcludedGroups=knownFailure
-        continue-on-error: true
-        env:
-          BASE_URL: https://www.saucedemo.com
-          DEFAULT_USERNAME: standard_user
-          DEFAULT_PASSWORD: secret_sauce
+      - name: Install Chrome for Selenium
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
 
-      - name: Run known-failure tests (do not fail build)
-        run: mvn test -DexcludedGroups= -Dgroups=knownFailure
+      - name: Run all tests (including known failures)
+        run: mvn test -Dheadless=true
         continue-on-error: true
         env:
           BASE_URL: https://www.saucedemo.com
