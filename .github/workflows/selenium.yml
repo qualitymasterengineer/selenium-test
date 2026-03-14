@@ -9,6 +9,7 @@ on:
 
 jobs:
   test:
+    name: Selenium E2E Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -45,6 +46,16 @@ jobs:
         run: mvn allure:report -q
         env:
           BASE_URL: https://www.saucedemo.com
+
+      - name: Patch Allure report (GitHub Actions + Selenium logo in Executors)
+        if: always()
+        run: node scripts/patch-allure-selenium-logo.js
+        env:
+          GITHUB_ACTIONS: true
+          GITHUB_SERVER_URL: ${{ github.server_url }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          GITHUB_RUN_NUMBER: ${{ github.run_number }}
 
       - name: Upload Allure results
         if: always()

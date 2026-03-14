@@ -27,23 +27,51 @@ if (!fs.existsSync(logoSource)) {
   process.exit(0);
 }
 
-function getSeleniumVersion() {
-  const pomPath = path.join(projectRoot, 'pom.xml');
-  if (!fs.existsSync(pomPath)) return null;
-  const pom = fs.readFileSync(pomPath, 'utf8');
-  const m = pom.match(/<selenium\.version>([^<]+)<\/selenium\.version>/);
+function getPomValue(pom, tagName) {
+  const escaped = tagName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const m = pom.match(new RegExp('<' + escaped + '>([^<]+)<\\/' + escaped + '>'));
   return m ? m[1].trim() : null;
 }
 
-const seleniumVersion = getSeleniumVersion();
+const pomPath = path.join(projectRoot, 'pom.xml');
+const pom = fs.existsSync(pomPath) ? fs.readFileSync(pomPath, 'utf8') : '';
+const projectName = getPomValue(pom, 'name') || 'SauceDemo Selenium E2E';
+
+const seleniumVersion = getPomValue(pom, 'selenium.version');
 const seleniumBuildName = seleniumVersion ? `Selenium ${seleniumVersion}` : 'Selenium 4.x';
 
 fs.copyFileSync(logoSource, logoDest);
 
-// 1. Añadir segundo ejecutor (Selenium Framework) en widgets/executors.json
+const isGitHubActions = process.env.GITHUB_ACTIONS === 'true';
+const repoUrl =
+  process.env.GITHUB_SERVER_URL && process.env.GITHUB_REPOSITORY
+    ? `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}`
+    : 'https://github.com/qualitymasterengineer/selenium-test';
+const buildUrl =
+  process.env.GITHUB_SERVER_URL &&
+  process.env.GITHUB_REPOSITORY &&
+  process.env.GITHUB_RUN_ID
+    ? `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`
+    : repoUrl;
+
+const githubActionsExecutor = {
+  reportName: 'Allure Report',
+  name: 'GitHub Actions',
+  type: 'github',
+  buildName: projectName,
+  buildOrder: parseInt(process.env.GITHUB_RUN_NUMBER || '0', 10),
+  reportUrl: repoUrl,
+  buildUrl,
+};
+
+// 1. Actualizar widgets/executors.json: en CI prepender GitHub Actions; mantener Maven y añadir Selenium Framework
 if (fs.existsSync(executorsPath)) {
   let executors = JSON.parse(fs.readFileSync(executorsPath, 'utf8'));
   if (!Array.isArray(executors)) executors = [executors];
+  if (isGitHubActions) {
+    const hasGh = executors.some(e => e.type === 'github' && e.name === 'GitHub Actions');
+    if (!hasGh) executors.unshift(githubActionsExecutor);
+  }
   const hasSelenium = executors.some(e => (e.type === 'selenium-custom') || (e.name && e.name.includes('Selenium Framework')));
   if (!hasSelenium) {
     executors.push({
@@ -52,8 +80,8 @@ if (fs.existsSync(executorsPath)) {
       buildName: seleniumBuildName,
       reportUrl: 'https://www.selenium.dev'
     });
-    fs.writeFileSync(executorsPath, JSON.stringify(executors), 'utf8');
   }
+  fs.writeFileSync(executorsPath, JSON.stringify(executors), 'utf8');
 }
 
 const customStyle = `
