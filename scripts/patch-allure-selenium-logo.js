@@ -11,7 +11,7 @@ const projectRoot = path.resolve(__dirname, '..');
 const reportDir = path.join(projectRoot, 'target', 'site', 'allure-maven-plugin');
 const indexPath = path.join(reportDir, 'index.html');
 const executorsPath = path.join(reportDir, 'widgets', 'executors.json');
-const logoSource = path.join(projectRoot, 'scripts', 'assets', 'selenium-logo.svg');
+const logoSource = path.join(projectRoot, 'assets', 'selenium-logo.svg');
 const logoDest = path.join(reportDir, 'selenium-logo.svg');
 
 if (!fs.existsSync(reportDir)) {
