@@ -61,3 +61,27 @@ jobs:
         with:
           name: allure-report
           path: target/site/allure-maven-plugin/
+
+      - name: Send Results to Showcase Repository
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.API_TOKEN_GITHUB }}
+        run: |
+          # 1. Configuración de identidad
+          git config --global user.name "Quality Master Engineer"
+          git config --global user.email "qa-automation@qme.com"
+          
+          # 2. Clonar el repositorio de visualización pública
+          # Usamos la variable API_TOKEN_GITHUB para tener permisos de escritura
+          git clone https://$GITHUB_TOKEN@github.com/qualitymasterengineer/selenium-test-allure-showcase.git showcase-repo
+          
+          # 3. Mover los resultados de Allure generados por Maven
+          # Maven los guarda en target/allure-results según tu pom.xml
+          mkdir -p showcase-repo/allure-results
+          cp -r target/allure-results/* showcase-repo/allure-results/
+          
+          # 4. Sincronizar y subir los cambios
+          cd showcase-repo
+          git add allure-results/
+          git commit -m "chore: automated update of selenium test results" || echo "No changes to commit"
+          git push origin main
